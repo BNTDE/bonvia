@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 // DEMO — remove this import together with src/demo-data.js when you go live.
-import { makeDemoTransfers, DEMO_CONF } from "./demo-data.js";
+import { makeDemoTransfers, makeDemoFormData, DEMO_CONF } from "./demo-data.js";
 
 /* ------------------------------------------------------------------ */
 /*  Styles                                                             */
@@ -973,6 +973,28 @@ function TransferForm({ initial, lead, conf, onSave, onCancel }) {
     <div className="sheet">
       <h2>{initial ? "Edit transfer" : "New airport transfer"}</h2>
       <p className="sub">Logistics sees this the moment you post it.</p>
+
+      {/* DEMO — delete this block when you go live. */}
+      {!initial && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
+          border: "1px dashed var(--rule)", borderRadius: 10, background: "#F7F8FB",
+          padding: "10px 13px", marginBottom: 16,
+        }}>
+          <span className="eyebrow" style={{ color: "var(--ink3)" }}>DEMO</span>
+          <span style={{ fontSize: 12.5, color: "var(--ink2)", marginRight: "auto" }}>
+            Fill every field with a sample flight, then post it as normal.
+          </span>
+          <button className="btn btn-sm" onClick={() => {
+            touched.current = true;          // keep the sample pick-up time
+            setF({ ...BLANK, ...makeDemoFormData() });
+            setErr("");
+          }}>
+            <Wand2 size={14} />Fill in a sample flight
+          </button>
+        </div>
+      )}
+
       {err ? <div className="err">{err}</div> : null}
 
       <div className="grid">

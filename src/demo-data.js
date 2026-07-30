@@ -21,6 +21,55 @@ const day = (n) => {
 };
 const hoursAgo = (h) => Date.now() - h * 3600 * 1000;
 
+/* ------------------------------------------------------------------ */
+/*  Prefill for the New Transfer form                                  */
+/* ------------------------------------------------------------------ */
+
+/** Ready-made flights. Each click cycles to the next one, so you can post
+ *  several different transfers in a row without typing anything. */
+const FORM_SAMPLES = [
+  {
+    direction: "arrival", passenger: "Ana Popescu", pax: 1,
+    flightNo: "TK1854", airport: "OTP T1", time: "14:35", pickupTime: "15:05",
+    from: "OTP T1 arrivals hall", to: "Bonatti site office, Ploiești",
+    phone: "+40 744 902 551",
+    notes: "One suitcase. Needs to be on site before 17:00.",
+  },
+  {
+    direction: "departure", passenger: "Sorin Ilie", pax: 3,
+    flightNo: "RO263", airport: "OTP T2", time: "11:30", pickupTime: "09:00",
+    from: "Crowne Plaza, Bucharest", to: "OTP T2 departures",
+    phone: "+40 733 610 087",
+    notes: "Three passengers plus survey equipment — needs the van, not a car.",
+  },
+  {
+    direction: "arrival", passenger: "Giulia Bernardi", pax: 2,
+    flightNo: "AZ1041", airport: "OTP T1", time: "09:05", pickupTime: "09:35",
+    from: "OTP T1 arrivals hall", to: "Hotel Novotel, Bucharest",
+    phone: "+39 340 552 7719",
+    notes: "Italian speaker preferred if possible.",
+  },
+  {
+    direction: "departure", passenger: "Hans Vogel", pax: 1,
+    flightNo: "LH1416", airport: "OTP T1", time: "15:00", pickupTime: "12:30",
+    from: "Hotel Marriott, Bucharest", to: "OTP T1 departures",
+    phone: "+49 171 884 2260",
+    notes: "",
+  },
+];
+
+let formTurn = 0;
+
+/**
+ * One filled-in transfer, ready to post. Dated tomorrow so the pick-up time
+ * is always still ahead of you.
+ */
+export function makeDemoFormData() {
+  const sample = FORM_SAMPLES[formTurn % FORM_SAMPLES.length];
+  formTurn += 1;
+  return { ...sample, date: day(1) };
+}
+
 /** Airports and outside services the demo rows reference. */
 export const DEMO_CONF = {
   airports: ["OTP T1", "OTP T2", "CLJ", "FCO T3"],
