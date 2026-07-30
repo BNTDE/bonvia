@@ -9,6 +9,9 @@ import {
 // DEMO — remove this import together with src/demo-data.js when you go live.
 import { makeDemoTransfers, makeDemoFormData, DEMO_CONF } from "./demo-data.js";
 
+import logoMark from "./assets/logo-mark.png";
+import logoFull from "./assets/logo-full.png";
+
 /* ------------------------------------------------------------------ */
 /*  Styles                                                             */
 /* ------------------------------------------------------------------ */
@@ -45,9 +48,11 @@ const CSS = `
 /* ---- top bar ---- */
 .topbar { background:var(--ink); color:#fff; position:sticky; top:0; z-index:40; }
 .topbar-in { max-width:1080px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; gap:12px; }
+.brandmark { height:38px; width:auto; flex-shrink:0; background:#fff;
+  border-radius:9px; padding:5px 7px; }
 .brand { display:flex; flex-direction:column; line-height:1.05; margin-right:auto; min-width:0; }
 .brand b { font-size:18px; font-weight:700; letter-spacing:-.015em; }
-.brand span { color:#9C9CA1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.brand > span { color:#9C9CA1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pill-alert { display:flex; align-items:center; gap:6px; background:var(--signal); color:#241900;
   padding:6px 11px; border-radius:999px; font-weight:600; font-size:12.5px; border:none; white-space:nowrap; }
 .pill-alert b { font-family:var(--mono); }
@@ -305,8 +310,12 @@ table.rep .m { font-family:var(--mono); white-space:nowrap; }
   .grid { grid-template-columns:1fr; }
   .tiles { grid-template-columns:repeat(2,1fr); }
   .topbar-in { padding:10px 14px; gap:9px; }
-  .brand b { font-size:16px; }
-  .brand span { display:none; }
+  /* .brand is the only shrinkable item in the top bar, so without this it
+     collapses to 0 and the wordmark disappears on narrow screens. */
+  .brand { flex:0 0 auto; margin-right:auto; }
+  .brand b { font-size:17px; }
+  .brandmark { height:32px; padding:4px 6px; }
+  .brand > span { display:none; }
   .who { padding:6px 9px; }
   .wrap { padding:14px 13px 92px; }
   .tabs { display:none; }
@@ -1611,9 +1620,8 @@ function SignInGate({ initial, onStart }) {
       <style>{CSS}</style>
       <div className="wrap" style={{ maxWidth: 460, paddingTop: 50 }}>
         <div className="sheet">
-          <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-.02em", marginBottom: 2 }}>
-            <Wordmark />
-          </div>
+          <img src={logoFull} alt="Bonvia"
+            style={{ width: 178, maxWidth: "62%", height: "auto", display: "block", marginBottom: 14 }} />
           <h2 style={{ marginTop: 6, fontSize: 21 }}>Who's at the desk?</h2>
           <p className="sub">
             {returning
@@ -1856,6 +1864,7 @@ export default function TransferDesk() {
 
       <div className="topbar">
         <div className="topbar-in">
+          <img className="brandmark" src={logoMark} alt="" aria-hidden="true" />
           <div className="brand">
             <b><Wordmark onDark /></b>
             <span className="eyebrow">HR → Logistics · airport runs</span>
