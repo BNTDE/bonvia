@@ -3,7 +3,7 @@ import {
   PlaneLanding, PlaneTakeoff, Check, Users, Search, Plus, X, Phone, Navigation,
   FileText, Settings, RefreshCw, MessageSquare, Pencil, Wallet, CarFront, CalendarDays,
   Download, Copy, LayoutList, Truck, ChevronLeft, ChevronRight, AlertTriangle,
-  Wand2, Trash2
+  Wand2, Trash2, Undo2, ArchiveRestore
 } from "lucide-react";
 
 // DEMO — remove this import together with src/demo-data.js when you go live.
@@ -18,8 +18,13 @@ const CSS = `
 
 .td, .td * { box-sizing: border-box; }
 .td {
-  --ink:#101B33; --ink2:#3D4A66; --ink3:#7A869F;
-  --paper:#EDEFF4; --card:#FFFFFF; --rule:#D7DCE6; --rule2:#E8EBF1;
+  /* ---- Brand chrome: Bonatti white / red / black ---- */
+  --ink:#141414; --ink2:#4A4A4A; --ink3:#7C7C82;
+  --paper:#F4F4F5; --card:#FFFFFF; --rule:#D6D6DA; --rule2:#E6E6EA;
+  --brand:#C8102E; --brand-dark:#A00D25;
+  /* ---- Status colours: deliberately NOT brand colours. ----
+     These carry meaning, so they must stay instantly tellable apart
+     at a glance. Do not fold these into the red/black palette. */
   --signal:#EFA00B; --signal-wash:#FFF7E4;
   --go:#0E7A58; --go-wash:#E7F5F0;
   --hand:#5A4FCF; --hand-wash:#EEECFC;
@@ -27,12 +32,12 @@ const CSS = `
   --sans:'Archivo','Segoe UI',system-ui,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,'Courier New',monospace;
   font-family:var(--sans); background:var(--paper); color:var(--ink);
-  min-height:100vh; font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
+  min-height:100vh; font-size:15.5px; line-height:1.5; -webkit-font-smoothing:antialiased;
 }
 .td button { font-family:inherit; cursor:pointer; }
 .td a { color:inherit; }
 .td input, .td textarea, .td select { font-family:inherit; font-size:14px; }
-.td :focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+.td :focus-visible { outline:3px solid var(--brand); outline-offset:2px; border-radius:4px; }
 
 .eyebrow { font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:600; }
 .mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
@@ -42,23 +47,23 @@ const CSS = `
 .topbar-in { max-width:1080px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; gap:12px; }
 .brand { display:flex; flex-direction:column; line-height:1.05; margin-right:auto; min-width:0; }
 .brand b { font-size:18px; font-weight:700; letter-spacing:-.015em; }
-.brand span { color:#93A0BC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.brand span { color:#9C9CA1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pill-alert { display:flex; align-items:center; gap:6px; background:var(--signal); color:#241900;
   padding:6px 11px; border-radius:999px; font-weight:600; font-size:12.5px; border:none; white-space:nowrap; }
 .pill-alert b { font-family:var(--mono); }
-.who { display:flex; align-items:center; gap:7px; background:#1E2B48; border:1px solid #2E3D5F;
-  color:#D5DCEC; padding:6px 10px; border-radius:8px; font-size:12.5px; white-space:nowrap; }
+.who { display:flex; align-items:center; gap:7px; background:#262626; border:1px solid #3A3A3A;
+  color:#D6D6D9; padding:6px 10px; border-radius:8px; font-size:12.5px; white-space:nowrap; }
 .who i { width:7px; height:7px; border-radius:99px; background:#4ADE9B; font-style:normal; }
-.icon-btn { background:transparent; border:1px solid #2E3D5F; color:#B9C4DA; width:36px; height:36px;
+.icon-btn { background:transparent; border:1px solid #3A3A3A; color:#B5B5B9; width:36px; height:36px;
   border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
-.icon-btn:hover { background:#1E2B48; color:#fff; }
+.icon-btn:hover { background:#262626; color:#fff; }
 
 /* ---- tabs ---- */
 .tabs { border-bottom:1px solid var(--rule); background:var(--card); position:sticky; top:60px; z-index:30; }
 .tabs-in { max-width:1080px; margin:0 auto; padding:0 18px; display:flex; gap:2px; }
-.tab { background:none; border:none; padding:13px 14px; color:var(--ink3); font-weight:600; font-size:13px;
+.tab { background:none; border:none; padding:15px 16px; color:var(--ink3); font-weight:600; font-size:14.5px;
   border-bottom:2px solid transparent; display:flex; align-items:center; gap:7px; }
-.tab.on { color:var(--ink); border-bottom-color:var(--signal); }
+.tab.on { color:var(--ink); border-bottom-color:var(--brand); border-bottom-width:3px; }
 .tab-badge { font-family:var(--mono); font-size:11px; background:var(--signal); color:#241900;
   border-radius:99px; padding:1px 6px; }
 
@@ -70,26 +75,26 @@ const CSS = `
 /* ---- controls ---- */
 .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
 .search { flex:1; min-width:180px; display:flex; align-items:center; gap:8px; background:var(--card);
-  border:1px solid var(--rule); border-radius:9px; padding:0 11px; height:42px; }
+  border:1px solid var(--rule); border-radius:9px; padding:0 13px; height:48px; }
 .search input { border:none; outline:none; background:none; width:100%; }
 .chips { display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
 .chips::-webkit-scrollbar { display:none; }
-.chip { background:var(--card); border:1px solid var(--rule); border-radius:99px; padding:8px 13px;
-  font-size:12.5px; font-weight:500; color:var(--ink2); white-space:nowrap; flex-shrink:0; }
+.chip { background:var(--card); border:1px solid var(--rule); border-radius:99px; padding:10px 16px;
+  font-size:13.5px; font-weight:600; color:var(--ink2); white-space:nowrap; flex-shrink:0; }
 .chip.on { background:var(--ink); border-color:var(--ink); color:#fff; }
 .chip .n { font-family:var(--mono); opacity:.65; margin-left:5px; }
 
 .btn { border-radius:9px; border:1px solid var(--rule); background:var(--card); color:var(--ink);
-  padding:10px 14px; font-weight:600; font-size:13px; display:inline-flex; align-items:center;
-  justify-content:center; gap:7px; min-height:40px; }
+  padding:12px 17px; font-weight:600; font-size:14.5px; display:inline-flex; align-items:center;
+  justify-content:center; gap:8px; min-height:46px; }
 .btn:hover { border-color:var(--ink3); }
 .btn-primary { background:var(--ink); border-color:var(--ink); color:#fff; }
-.btn-primary:hover { background:#1B2A4A; }
+.btn-primary:hover { background:#2C2C2C; }
 .btn-go { background:var(--go); border-color:var(--go); color:#fff; }
 .btn-hand { background:var(--hand-wash); border-color:#C9C3F6; color:var(--hand); }
-.btn-sm { padding:7px 11px; font-size:12.5px; border-radius:8px; min-height:36px; }
+.btn-sm { padding:9px 13px; font-size:13.5px; border-radius:8px; min-height:42px; }
 .btn-ghost { background:transparent; border-color:transparent; color:var(--ink3); }
-.btn-ghost:hover { color:var(--ink); background:#E3E7EF; }
+.btn-ghost:hover { color:var(--ink); background:#EAEAEC; }
 .btn-big { width:100%; min-height:50px; font-size:15px; }
 
 /* ---- banner ---- */
@@ -116,7 +121,7 @@ const CSS = `
 .row.s-pending  { border-left-color:var(--signal); background:linear-gradient(90deg,var(--signal-wash),#fff 190px); }
 .row.s-accepted { border-left-color:var(--go); }
 .row.s-external { border-left-color:var(--hand); }
-.row.s-done     { border-left-color:#C9CFDB; opacity:.85; }
+.row.s-done     { border-left-color:#D8D8DC; opacity:.85; }
 .row.s-cancelled{ border-left-color:var(--stop); opacity:.6; }
 .row.overdue    { border-left-color:var(--stop); background:linear-gradient(90deg,var(--stop-wash),#fff 190px); }
 
@@ -129,8 +134,8 @@ const CSS = `
 
 .body { flex:1; padding:14px 16px; min-width:0; }
 .line1 { display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
-.line1 .nm { font-size:16px; font-weight:600; letter-spacing:-.01em; }
-.fl { font-family:var(--mono); font-size:12.5px; font-weight:600; background:#EEF1F6;
+.line1 .nm { font-size:17.5px; font-weight:600; letter-spacing:-.01em; }
+.fl { font-family:var(--mono); font-size:12.5px; font-weight:600; background:#EFEFF1;
   border-radius:5px; padding:2px 7px; letter-spacing:.04em; }
 .apt { font-family:var(--mono); font-size:12.5px; color:var(--ink2); }
 .pax { display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--ink3); }
@@ -142,8 +147,8 @@ const CSS = `
   font-weight:600; background:var(--hand-wash); color:var(--hand); border-radius:5px; padding:2px 7px; }
 
 .status { display:flex; align-items:center; gap:7px; margin-top:10px; font-size:12px; flex-wrap:wrap; }
-.dot { width:8px; height:8px; border-radius:99px; flex-shrink:0; }
-.status .lb { font-weight:600; letter-spacing:.1em; font-size:10.5px; }
+.dot { width:11px; height:11px; border-radius:99px; flex-shrink:0; }
+.status .lb { font-weight:700; letter-spacing:.08em; font-size:12px; }
 .status .by { color:var(--ink3); }
 .tagline { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.14em;
   padding:2px 6px; border-radius:4px; }
@@ -151,17 +156,17 @@ const CSS = `
 .t-over { background:var(--stop); color:#fff; }
 
 .acts { display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; align-items:center; }
-.confirm-box { margin-top:11px; background:#F7F8FB; border:1px solid var(--rule2); border-radius:9px; padding:11px; }
+.confirm-box { margin-top:11px; background:#F7F7F8; border:1px solid var(--rule2); border-radius:9px; padding:11px; }
 .confirm-box label { display:block; font-size:12px; color:var(--ink2); margin-bottom:6px; font-weight:500; }
 .confirm-box .r { display:flex; gap:7px; flex-wrap:wrap; }
-.confirm-box input { flex:1; min-width:140px; height:40px; border:1px solid var(--rule); border-radius:7px; padding:0 10px; }
+.confirm-box input { flex:1; min-width:140px; height:46px; border:1px solid var(--rule); border-radius:7px; padding:0 10px; }
 
 .thread { margin-top:11px; border-top:1px solid var(--rule2); padding-top:10px; }
 .msg { display:flex; gap:8px; font-size:12.5px; padding:4px 0; }
 .msg .m-by { font-weight:600; white-space:nowrap; }
 .msg .m-at { font-family:var(--mono); font-size:10.5px; color:var(--ink3); margin-left:auto; white-space:nowrap; }
 .msg-in { display:flex; gap:7px; margin-top:8px; }
-.msg-in input { flex:1; height:40px; border:1px solid var(--rule); border-radius:7px; padding:0 10px; }
+.msg-in input { flex:1; height:46px; border:1px solid var(--rule); border-radius:7px; padding:0 10px; }
 
 /* ---- driver view ---- */
 .dhead { display:flex; gap:8px; margin-bottom:14px; }
@@ -177,7 +182,7 @@ const CSS = `
 .dwho .n { font-size:18px; font-weight:600; letter-spacing:-.01em; }
 .dwho .f2 { margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .dleg { display:flex; align-items:center; gap:10px; margin-top:13px; padding:11px 12px;
-  background:#F7F8FB; border-radius:9px; font-size:14px; }
+  background:#F7F7F8; border-radius:9px; font-size:14px; }
 .dleg .lb { font-size:9.5px; letter-spacing:.14em; font-weight:700; color:var(--ink3); width:42px; flex-shrink:0; }
 .dleg a { margin-left:auto; color:var(--ink2); }
 .dacts { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:13px; }
@@ -192,7 +197,7 @@ const CSS = `
 .f { display:flex; flex-direction:column; gap:5px; }
 .f.wide { grid-column:1 / -1; }
 .f label { font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:600; color:var(--ink2); }
-.f input, .f textarea, .f select { border:1px solid var(--rule); border-radius:8px; padding:11px;
+.f input, .f textarea, .f select { border:1px solid var(--rule); border-radius:8px; padding:13px;
   background:#fff; outline:none; width:100%; }
 .f input:focus, .f textarea:focus, .f select:focus { border-color:var(--ink); }
 .f .hint { font-size:11.5px; color:var(--ink3); }
@@ -240,7 +245,7 @@ table.rep .m { font-family:var(--mono); white-space:nowrap; }
 /* ---- calendar ---- */
 .cal { background:var(--card); border:1px solid var(--rule2); border-radius:12px; overflow:hidden; }
 .cal-head { display:grid; grid-template-columns:repeat(7,1fr); border-bottom:1px solid var(--rule);
-  background:#F7F8FB; }
+  background:#F7F7F8; }
 .cal-head span { padding:9px 4px; text-align:center; font-size:9.5px; letter-spacing:.14em;
   font-weight:700; color:var(--ink3); }
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); }
@@ -248,13 +253,13 @@ table.rep .m { font-family:var(--mono); white-space:nowrap; }
   min-height:106px; padding:6px 6px 7px; background:#fff; display:flex; flex-direction:column;
   gap:3px; align-items:stretch; text-align:left; font-family:inherit; }
 .cal-cell:nth-child(7n) { border-right:none; }
-.cal-cell.out { background:#F9FAFC; cursor:default; }
-.cal-cell.sel { background:#EDF1F8; box-shadow:inset 0 0 0 2px var(--ink); }
+.cal-cell.out { background:#F9F9FA; cursor:default; }
+.cal-cell.sel { background:#F0F0F2; box-shadow:inset 0 0 0 2px var(--ink); }
 .cal-cell .dn { font-family:var(--mono); font-size:12.5px; font-weight:600; color:var(--ink2);
   align-self:flex-start; }
 .cal-cell.today .dn { background:var(--ink); color:#fff; border-radius:5px; padding:1px 5px; }
 .cal-ev { display:flex; gap:5px; align-items:center; font-size:10.5px; line-height:1.35;
-  background:#F1F3F8; border-radius:4px; padding:2px 5px; overflow:hidden; }
+  background:#F1F1F3; border-radius:4px; padding:2px 5px; overflow:hidden; }
 .cal-ev .b { width:3px; align-self:stretch; border-radius:2px; flex-shrink:0; min-height:13px; }
 .cal-ev .tm { font-family:var(--mono); font-weight:600; flex-shrink:0; }
 .cal-ev .nm { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:var(--ink2); }
@@ -271,24 +276,24 @@ table.rep .m { font-family:var(--mono); white-space:nowrap; }
 .empty b { display:block; color:var(--ink); font-size:15px; margin-bottom:5px; }
 
 .taglist { display:flex; gap:7px; flex-wrap:wrap; margin-top:9px; }
-.tagx { display:inline-flex; align-items:center; gap:6px; background:#F1F3F8; border:1px solid var(--rule2);
+.tagx { display:inline-flex; align-items:center; gap:6px; background:#F1F1F3; border:1px solid var(--rule2);
   border-radius:7px; padding:6px 9px; font-size:12.5px; font-family:var(--mono); }
 .tagx button { background:none; border:none; color:var(--ink3); display:grid; place-items:center; padding:0; }
 .tagx button:hover { color:var(--stop); }
 
-.modal-bg { position:fixed; inset:0; background:rgba(16,27,51,.5); display:grid; place-items:center;
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); display:grid; place-items:center;
   padding:16px; z-index:60; }
 .modal { background:var(--card); border-radius:13px; padding:20px; max-width:620px; width:100%;
   max-height:86vh; overflow:auto; }
 .modal h3 { margin:0 0 10px; font-size:16px; }
 .codebox { font-family:var(--mono); font-size:11px; width:100%; height:220px; border:1px solid var(--rule);
-  border-radius:8px; padding:11px; white-space:pre; overflow:auto; background:#F7F8FB; }
+  border-radius:8px; padding:11px; white-space:pre; overflow:auto; background:#F7F7F8; }
 
 .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:86px; background:var(--ink);
   color:#fff; padding:12px 18px; border-radius:10px; font-size:13px; font-weight:500; z-index:70;
-  box-shadow:0 8px 24px rgba(16,27,51,.28); max-width:90vw; text-align:center; }
+  box-shadow:0 8px 24px rgba(0,0,0,.28); max-width:90vw; text-align:center; }
 
-.note-box { background:#F7F8FB; border:1px solid var(--rule2); border-radius:9px; padding:13px 15px;
+.note-box { background:#F7F7F8; border:1px solid var(--rule2); border-radius:9px; padding:13px 15px;
   font-size:12.5px; color:var(--ink2); line-height:1.55; }
 .note-box b { color:var(--ink); }
 
@@ -309,11 +314,11 @@ table.rep .m { font-family:var(--mono); white-space:nowrap; }
   .bnav { display:flex; position:fixed; bottom:0; left:0; right:0; background:var(--card);
     border-top:1px solid var(--rule); z-index:50; padding-bottom:env(safe-area-inset-bottom); }
   .bnav button { flex:1; background:none; border:none; padding:9px 4px 11px; color:var(--ink3);
-    display:flex; flex-direction:column; align-items:center; gap:4px; font-size:10.5px; font-weight:600;
-    position:relative; min-height:54px; }
+    display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11.5px; font-weight:600;
+    position:relative; min-height:60px; }
   .bnav button.on { color:var(--ink); }
   .bnav button.on::before { content:''; position:absolute; top:0; left:22%; right:22%; height:2.5px;
-    background:var(--signal); border-radius:0 0 3px 3px; }
+    background:var(--brand); border-radius:0 0 3px 3px; }
   .bnav .bdot { position:absolute; top:6px; right:50%; margin-right:-20px; background:var(--signal);
     color:#241900; font-family:var(--mono); font-size:9.5px; font-weight:700; border-radius:99px;
     padding:0 5px; line-height:15px; }
@@ -336,8 +341,8 @@ table.rep .m { font-family:var(--mono); white-space:nowrap; }
   .form-foot .btn { width:100%; }
   .controls .btn-primary { display:none; }
   .fab { display:flex; position:fixed; right:15px; bottom:70px; z-index:45; width:54px; height:54px;
-    border-radius:50%; border:none; background:var(--ink); color:#fff; align-items:center;
-    justify-content:center; box-shadow:0 6px 18px rgba(16,27,51,.34); }
+    border-radius:50%; border:none; background:var(--brand); color:#fff; align-items:center;
+    justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.34); }
   .weeknav .lbl { flex:1; text-align:center; }
   .dtime { font-size:26px; }
   .dacts { grid-template-columns:1fr; }
@@ -659,8 +664,21 @@ function TransferRow({ t, me, conf, onAct, isNew }) {
                 <X size={13} />Cancel
               </button>
             )}
+            {/* A cancelled transfer must be un-cancellable — people mis-tap. */}
+            {t.status === "cancelled" && (
+              <button className="btn btn-sm btn-ghost"
+                onClick={() => onAct(t.id, { status: "pending" }, `${me.name} un-cancelled this transfer`)}>
+                <Undo2 size={13} />Un-cancel
+              </button>
+            )}
             <button className="btn btn-sm btn-ghost" onClick={() => onAct(t.id, "__edit__")}>
               <Pencil size={13} />Edit
+            </button>
+            {/* Never destroys anything — moves it to the Bin tab, where it
+                can be put back. There is no permanent delete anywhere. */}
+            <button className="btn btn-sm btn-ghost"
+              onClick={() => onAct(t.id, { deletedAt: Date.now() }, `${me.name} moved this to the bin`)}>
+              <Trash2 size={13} />Remove
             </button>
           </div>
         )}
@@ -978,7 +996,7 @@ function TransferForm({ initial, lead, conf, onSave, onCancel }) {
       {!initial && (
         <div style={{
           display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
-          border: "1px dashed var(--rule)", borderRadius: 10, background: "#F7F8FB",
+          border: "1px dashed var(--rule)", borderRadius: 10, background: "#F7F7F8",
           padding: "10px 13px", marginBottom: 16,
         }}>
           <span className="eyebrow" style={{ color: "var(--ink3)" }}>DEMO</span>
@@ -1425,7 +1443,8 @@ function SettingsView({ me, setMe, conf, setConf, items, reload, onToast }) {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>Restore from a backup</h3>
             <p style={{ fontSize: 12.5, color: "var(--ink3)", marginTop: 0 }}>
-              Paste the contents of a backup file. This replaces the board for everyone.
+              Paste the contents of a backup file. The board you have now is not lost —
+              it gets moved to the <b>Bin</b>, so you can undo this.
             </p>
             <textarea className="codebox" value={restore} onChange={(e) => setRestore(e.target.value)} placeholder="{ … }" />
             <div className="form-foot">
@@ -1435,7 +1454,15 @@ function SettingsView({ me, setMe, conf, setConf, items, reload, onToast }) {
                   const p = JSON.parse(restore);
                   const board = Array.isArray(p) ? p : p.board;
                   if (!Array.isArray(board)) throw new Error();
-                  await writeBoard(board);
+                  // Don't discard what's already there — archive it into the
+                  // bin so a restore can itself be undone. Ids are suffixed so
+                  // the archived copies can't collide with the incoming ones.
+                  const now = Date.now();
+                  const current = await readBoard();
+                  const archived = current.map((t) => ({
+                    ...t, id: `${t.id}~replaced-${now}`, deletedAt: t.deletedAt || now,
+                  }));
+                  await writeBoard([...archived, ...board]);
                   if (p.conf) { await writeConf({ ...DEFAULT_CONF, ...p.conf }); setConf({ ...DEFAULT_CONF, ...p.conf }); }
                   await reload(); setShow(false); setRestore(""); onToast("Board restored");
                 } catch { onToast("That doesn't look like a backup file"); }
@@ -1448,6 +1475,73 @@ function SettingsView({ me, setMe, conf, setConf, items, reload, onToast }) {
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*  Bin — nothing in this app is ever permanently deleted              */
+/* ------------------------------------------------------------------ */
+
+function BinView({ rows, onRestore }) {
+  const list = [...rows].sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+  return (
+    <>
+      <div className="note-box" style={{ marginBottom: 16 }}>
+        Anything removed from the board lands here and <b>stays here</b>. Nothing in
+        this app is ever permanently deleted, so a wrong tap is always undoable —
+        press <b>Put back</b> and the transfer returns to the board exactly as it was.
+      </div>
+
+      {list.length === 0 ? (
+        <div className="empty">
+          <b>The bin is empty.</b>
+          Nothing has been removed from the board.
+        </div>
+      ) : (
+        list.map((t) => {
+          const s = STATUS[t.status] || STATUS.pending;
+          return (
+            <div className="row s-done" key={t.id} style={{ opacity: 1 }}>
+              <div className="spine">
+                <div>
+                  <div className="t mono">{t.time || "--:--"}</div>
+                  <div className="dir">
+                    {t.direction === "arrival" ? <PlaneLanding size={13} /> : <PlaneTakeoff size={13} />}
+                    {t.direction === "arrival" ? "LANDS" : "DEPARTS"}
+                  </div>
+                </div>
+              </div>
+              <div className="body">
+                <div className="line1">
+                  <span className="nm">{t.passenger || "Unnamed passenger"}</span>
+                  {t.flightNo ? <span className="fl">{t.flightNo.toUpperCase()}</span> : null}
+                  {t.airport ? <span className="apt">{t.airport.toUpperCase()}</span> : null}
+                </div>
+                <div className="route">
+                  <span>{shortDate(t.date)}</span>
+                  <span className="arw">·</span>
+                  <span>{t.from || "—"}</span>
+                  <span className="arw">→</span>
+                  <span>{t.to || "—"}</span>
+                </div>
+                <div className="status">
+                  <span className="dot" style={{ background: s.color }} />
+                  <span className="lb" style={{ color: s.color }}>{s.short}</span>
+                  <span className="by">
+                    removed {t.deletedAt ? stamp(t.deletedAt) : ""}
+                  </span>
+                </div>
+                <div className="acts">
+                  <button className="btn btn-sm btn-go" onClick={() => onRestore(t.id)}>
+                    <ArchiveRestore size={14} />Put back on the board
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      )}
+    </>
+  );
+}
+
 /* ==================================================================== */
 /*  DEMO BAR — TEMPORARY. Delete this whole block when you go live.     */
 /* ==================================================================== */
@@ -1457,7 +1551,7 @@ function DemoBar({ count, onSeed, onClear }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
-      border: "1px dashed var(--rule)", borderRadius: 10, background: "#F7F8FB",
+      border: "1px dashed var(--rule)", borderRadius: 10, background: "#F7F7F8",
       padding: "10px 13px", marginBottom: 16,
     }}>
       <span className="eyebrow" style={{ color: "var(--ink3)" }}>DEMO</span>
@@ -1587,6 +1681,17 @@ export default function TransferDesk() {
   const setMe = (n) => { setMeState(n); writeMe(n); };
   const setConf = (c) => { setConfState(c); writeConf(c); };
 
+  const restoreFromBin = async (id) => {
+    await mutateBoard((list) => list.map((t) => (
+      t.id === id
+        ? { ...t, deletedAt: null, updatedAt: Date.now(),
+            thread: [...(t.thread || []), { by: me.name || "Someone", text: `${me.name} put this back on the board`, at: Date.now() }] }
+        : t
+    )));
+    await reload();
+    say("Put back on the board");
+  };
+
   /* ---- DEMO: delete these two together with the DemoBar block ---- */
   const seedDemo = async () => {
     const rows = makeDemoTransfers(me.name || "Elena");
@@ -1598,9 +1703,11 @@ export default function TransferDesk() {
     say(`Loaded ${rows.length} sample transfers`);
   };
   const clearBoard = async () => {
-    await writeBoard([]);
+    // Moves everything to the bin rather than wiping it. Recoverable.
+    const now = Date.now();
+    await mutateBoard((list) => list.map((t) => (t.deletedAt ? t : { ...t, deletedAt: now })));
     await reload();
-    say("Board cleared");
+    say("Board cleared — everything is in the Bin");
   };
   /* ---- END DEMO ---- */
 
@@ -1660,20 +1767,27 @@ export default function TransferDesk() {
     else if (patch && patch.status === "external") say("Marked for an outside service");
     else if (patch && patch.status === "done") say("Closed — it's in this week's report");
     else if (patch && "cost" in patch) say("Cost saved");
+    else if (patch && patch.deletedAt) say("Moved to the Bin — you can put it back");
+    else if (patch && patch.status === "pending" && note && note.includes("un-cancelled")) say("Un-cancelled");
     else if (note) say("Note added");
   };
 
-  const pending = useMemo(() => items.filter((t) => t.status === "pending"), [items]);
+  // Removed transfers live on in storage with a deletedAt stamp; every view
+  // below works off `live` so the bin is the only place they surface.
+  const live = useMemo(() => items.filter((t) => !t.deletedAt), [items]);
+  const binned = useMemo(() => items.filter((t) => t.deletedAt), [items]);
+
+  const pending = useMemo(() => live.filter((t) => t.status === "pending"), [live]);
   const visible = useMemo(() => {
     const term = q.trim().toLowerCase();
-    let out = items.filter((t) =>
+    let out = live.filter((t) =>
       filter === "open" ? ["pending", "accepted", "external"].includes(t.status)
         : filter === "all" ? true : t.status === filter);
     if (term) out = out.filter((t) =>
       [t.passenger, t.flightNo, t.airport, t.from, t.to, t.handler, t.notes, t.phone]
         .filter(Boolean).join(" ").toLowerCase().includes(term));
     return out.sort((a, b) => (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")));
-  }, [items, filter, q]);
+  }, [live, filter, q]);
 
   const byDay = useMemo(() => {
     const out = [];
@@ -1703,6 +1817,7 @@ export default function TransferDesk() {
     ? [
       { k: "board", label: "My runs", icon: <CarFront size={17} /> },
       { k: "calendar", label: "Month", icon: <CalendarDays size={17} /> },
+      { k: "bin", label: "Bin", icon: <Trash2 size={17} /> },
       { k: "settings", label: "Settings", icon: <Settings size={17} /> },
     ]
     : [
@@ -1710,14 +1825,15 @@ export default function TransferDesk() {
       { k: "calendar", label: "Month", icon: <CalendarDays size={17} /> },
       { k: "new", label: editing && editing !== "new" ? "Edit" : "New", icon: <Plus size={17} /> },
       { k: "report", label: "Reports", icon: <FileText size={17} /> },
+      { k: "bin", label: "Bin", icon: <Trash2 size={17} /> },
       { k: "settings", label: "Settings", icon: <Settings size={17} /> },
     ];
   // On a phone the + button covers "New", so it stays out of the bottom bar.
   const NAV = phone ? TABS.filter((t) => t.k !== "new") : TABS;
 
   const calRows = isDriver
-    ? items.filter((t) => ["accepted", "external", "done"].includes(t.status))
-    : items.filter((t) => t.status !== "cancelled");
+    ? live.filter((t) => ["accepted", "external", "done"].includes(t.status))
+    : live.filter((t) => t.status !== "cancelled");
 
   return (
     <div className="td" lang="en-GB">
@@ -1750,6 +1866,9 @@ export default function TransferDesk() {
               onClick={() => { if (t.k !== "new") setEditing(null); setTab(t.k); }}>
               {t.icon}{t.label}
               {t.k === "board" && !isDriver && pending.length > 0 && <span className="tab-badge">{pending.length}</span>}
+              {t.k === "bin" && binned.length > 0 && (
+                <span className="tab-badge" style={{ background: "var(--done)", color: "#fff" }}>{binned.length}</span>
+              )}
             </button>
           ))}
         </div>
@@ -1757,9 +1876,9 @@ export default function TransferDesk() {
 
       <div className="wrap">
         {/* DEMO — delete this line when you go live. */}
-        <DemoBar count={items.length} onSeed={seedDemo} onClear={clearBoard} />
+        <DemoBar count={live.length} onSeed={seedDemo} onClear={clearBoard} />
 
-        {tab === "board" && isDriver && <DriverBoard items={items} me={me} onAct={act} />}
+        {tab === "board" && isDriver && <DriverBoard items={live} me={me} onAct={act} />}
 
         {tab === "board" && !isDriver && (
           <>
@@ -1775,18 +1894,18 @@ export default function TransferDesk() {
 
             <div className="controls">
               <div className="search">
-                <Search size={16} color="#7A869F" />
+                <Search size={16} color="#8A8A8A" />
                 <input value={q} placeholder="Search name, flight, airport…" onChange={(e) => setQ(e.target.value)} />
                 {q && <button className="btn btn-sm btn-ghost" onClick={() => setQ("")}><X size={14} /></button>}
               </div>
               <div className="chips">
                 {[
-                  { k: "open", l: "Live", n: items.filter((t) => ["pending", "accepted", "external"].includes(t.status)).length },
+                  { k: "open", l: "Live", n: live.filter((t) => ["pending", "accepted", "external"].includes(t.status)).length },
                   { k: "pending", l: "Waiting", n: pending.length },
-                  { k: "accepted", l: "In-house", n: items.filter((t) => t.status === "accepted").length },
-                  { k: "external", l: "Outside", n: items.filter((t) => t.status === "external").length },
-                  { k: "done", l: "Done", n: items.filter((t) => t.status === "done").length },
-                  { k: "all", l: "All", n: items.length },
+                  { k: "accepted", l: "In-house", n: live.filter((t) => t.status === "accepted").length },
+                  { k: "external", l: "Outside", n: live.filter((t) => t.status === "external").length },
+                  { k: "done", l: "Done", n: live.filter((t) => t.status === "done").length },
+                  { k: "all", l: "All", n: live.length },
                 ].map((c) => (
                   <button key={c.k} className={"chip" + (filter === c.k ? " on" : "")} onClick={() => setFilter(c.k)}>
                     {c.l}<span className="n">{c.n}</span>
@@ -1838,10 +1957,11 @@ export default function TransferDesk() {
           <TransferForm initial={editing && editing !== "new" ? editing : null} lead={me.lead || 150}
             conf={conf} onSave={saveTransfer} onCancel={() => { setEditing(null); setTab("board"); }} />
         )}
-        {tab === "report" && <Report items={items} conf={conf} onToast={say} />}
+        {tab === "report" && <Report items={live} conf={conf} onToast={say} />}
+        {tab === "bin" && <BinView rows={binned} onRestore={restoreFromBin} />}
         {tab === "settings" && (
           <SettingsView me={me} setMe={setMe} conf={conf} setConf={setConf}
-            items={items} reload={reload} onToast={say} />
+            items={live} reload={reload} onToast={say} />
         )}
       </div>
 
