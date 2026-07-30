@@ -2,8 +2,12 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   PlaneLanding, PlaneTakeoff, Check, Users, Search, Plus, X, Phone, Navigation,
   FileText, Settings, RefreshCw, MessageSquare, Pencil, Wallet, CarFront, CalendarDays,
-  Download, Copy, LayoutList, Truck, ChevronLeft, ChevronRight, AlertTriangle
+  Download, Copy, LayoutList, Truck, ChevronLeft, ChevronRight, AlertTriangle,
+  Wand2, Trash2
 } from "lucide-react";
+
+// DEMO — remove this import together with src/demo-data.js when you go live.
+import { makeDemoTransfers, DEMO_CONF } from "./demo-data.js";
 
 /* ------------------------------------------------------------------ */
 /*  Styles                                                             */
@@ -1422,6 +1426,46 @@ function SettingsView({ me, setMe, conf, setConf, items, reload, onToast }) {
   );
 }
 
+/* ==================================================================== */
+/*  DEMO BAR — TEMPORARY. Delete this whole block when you go live.     */
+/* ==================================================================== */
+
+function DemoBar({ count, onSeed, onClear }) {
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
+      border: "1px dashed var(--rule)", borderRadius: 10, background: "#F7F8FB",
+      padding: "10px 13px", marginBottom: 16,
+    }}>
+      <span className="eyebrow" style={{ color: "var(--ink3)" }}>DEMO</span>
+      <span style={{ fontSize: 12.5, color: "var(--ink2)", marginRight: "auto" }}>
+        Test data for trying the app out — remove before real use.
+      </span>
+      <button className="btn btn-sm" onClick={onSeed}>
+        <Wand2 size={14} />Fill with sample transfers
+      </button>
+      {count > 0 && (
+        confirming ? (
+          <>
+            <button className="btn btn-sm" style={{ borderColor: "var(--stop)", color: "var(--stop)" }}
+              onClick={() => { setConfirming(false); onClear(); }}>
+              Delete all {count}?
+            </button>
+            <button className="btn btn-sm btn-ghost" onClick={() => setConfirming(false)}>Keep</button>
+          </>
+        ) : (
+          <button className="btn btn-sm btn-ghost" onClick={() => setConfirming(true)}>
+            <Trash2 size={13} />Clear board
+          </button>
+        )
+      )}
+    </div>
+  );
+}
+
+/* ==================== END DEMO BAR ==================================== */
+
 /* ------------------------------------------------------------------ */
 /*  Sign-in gate                                                       */
 /* ------------------------------------------------------------------ */
@@ -1433,6 +1477,7 @@ function SignInGate({ initial, onStart }) {
   const [draft, setDraft] = useState(initial);
   const ready = draft.name.trim().length > 0;
   const start = () => { if (ready) onStart({ ...draft, name: draft.name.trim() }); };
+  const returning = Boolean((initial.name || "").trim());
 
   return (
     <div className="td" lang="en-GB">
@@ -1441,7 +1486,11 @@ function SignInGate({ initial, onStart }) {
         <div className="sheet">
           <div className="eyebrow" style={{ color: "var(--ink3)" }}>Transfer Desk</div>
           <h2 style={{ marginTop: 6, fontSize: 21 }}>Who's at the desk?</h2>
-          <p className="sub">Your name goes on every transfer you post, confirm or drive.</p>
+          <p className="sub">
+            {returning
+              ? "Pick the desk you're on today, then open the board."
+              : "Your name goes on every transfer you post, confirm or drive."}
+          </p>
           <div className="grid">
             <Field label="Your name" wide>
               <input autoFocus value={draft.name} placeholder="e.g. Elena"
@@ -1461,7 +1510,7 @@ function SignInGate({ initial, onStart }) {
           </div>
           <div className="form-foot">
             <button className="btn btn-primary btn-big" onClick={start} disabled={!ready}>
-              Start
+              {returning ? "Open the board" : "Start"}
             </button>
           </div>
         </div>
@@ -1485,6 +1534,9 @@ export default function TransferDesk() {
   const [editing, setEditing] = useState(null);
   const [toast, setToast] = useState("");
   const [seen, setSeen] = useState(Date.now());
+  // Always ask which desk you're on at the start of a session. The name is
+  // remembered, so this is a one-tap confirmation rather than a login.
+  const [identified, setIdentified] = useState(false);
   const timer = useRef(null);
   const phone = usePhone();
 
@@ -1512,6 +1564,23 @@ export default function TransferDesk() {
 
   const setMe = (n) => { setMeState(n); writeMe(n); };
   const setConf = (c) => { setConfState(c); writeConf(c); };
+
+  /* ---- DEMO: delete these two together with the DemoBar block ---- */
+  const seedDemo = async () => {
+    const rows = makeDemoTransfers(me.name || "Elena");
+    await writeBoard(rows);
+    const nextConf = { ...conf, ...DEMO_CONF };
+    await writeConf(nextConf);
+    setConfState(nextConf);
+    await reload();
+    say(`Loaded ${rows.length} sample transfers`);
+  };
+  const clearBoard = async () => {
+    await writeBoard([]);
+    await reload();
+    say("Board cleared");
+  };
+  /* ---- END DEMO ---- */
 
   const learn = useCallback((patch) => {
     setConfState((c) => {
@@ -1598,7 +1667,14 @@ export default function TransferDesk() {
     return <div className="td"><style>{CSS}</style><div className="wrap"><div className="empty">Opening the board…</div></div></div>;
   }
 
-  if (!me.name) return <SignInGate initial={me} onStart={setMe} />;
+  if (!identified) {
+    return (
+      <SignInGate
+        initial={me}
+        onStart={(m) => { setMe(m); setIdentified(true); }}
+      />
+    );
+  }
 
   const isDriver = me.role === "driver";
   const TABS = isDriver
@@ -1658,6 +1734,9 @@ export default function TransferDesk() {
       </div>
 
       <div className="wrap">
+        {/* DEMO — delete this line when you go live. */}
+        <DemoBar count={items.length} onSeed={seedDemo} onClear={clearBoard} />
+
         {tab === "board" && isDriver && <DriverBoard items={items} me={me} onAct={act} />}
 
         {tab === "board" && !isDriver && (
