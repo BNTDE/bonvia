@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+npm-debug.log*
+
+# Never commit secrets. Nothing in this project needs any, but this is a guard
+# in case a key or token is ever added to the folder later.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+id_rsa*
+.netrc
+
+# Local tool state
+.claude/
+.vscode/
+.idea/
