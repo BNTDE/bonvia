@@ -522,6 +522,17 @@ function Time24({ value, onChange }) {
 
 const mapsHref = (q) => `https://maps.google.com/?q=${encodeURIComponent(q)}`;
 
+/** Wordmark: "Bon" in the ink colour, "via" in Bonatti red, matching the logo.
+ *  `onDark` flips the first half to white for the black top bar. */
+function Wordmark({ onDark }) {
+  return (
+    <span style={{ letterSpacing: "-.02em", whiteSpace: "nowrap" }}>
+      <span style={{ color: onDark ? "#FFFFFF" : "var(--ink)" }}>Bon</span>
+      <span style={{ color: "var(--brand)" }}>via</span>
+    </span>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Transfer row (HR + Logistics)                                      */
 /* ------------------------------------------------------------------ */
@@ -1600,7 +1611,9 @@ function SignInGate({ initial, onStart }) {
       <style>{CSS}</style>
       <div className="wrap" style={{ maxWidth: 460, paddingTop: 50 }}>
         <div className="sheet">
-          <div className="eyebrow" style={{ color: "var(--ink3)" }}>Bonvia</div>
+          <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-.02em", marginBottom: 2 }}>
+            <Wordmark />
+          </div>
           <h2 style={{ marginTop: 6, fontSize: 21 }}>Who's at the desk?</h2>
           <p className="sub">
             {returning
@@ -1844,7 +1857,7 @@ export default function TransferDesk() {
       <div className="topbar">
         <div className="topbar-in">
           <div className="brand">
-            <b>Bonvia</b>
+            <b><Wordmark onDark /></b>
             <span className="eyebrow">HR → Logistics · airport runs</span>
           </div>
           {!isDriver && pending.length > 0 && (
