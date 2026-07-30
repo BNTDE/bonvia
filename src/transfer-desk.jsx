@@ -1356,7 +1356,7 @@ function SettingsView({ me, setMe, conf, setConf, items, reload, onToast }) {
     try {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify({ board: items, conf }, null, 2)], { type: "application/json" }));
-      a.download = `transfer-desk-backup-${todayISO()}.json`; a.click();
+      a.download = `bonvia-backup-${todayISO()}.json`; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1500);
       onToast("Backup saved");
     } catch { onToast("Couldn't save the file here"); }
@@ -1506,7 +1506,7 @@ function SignInGate({ initial, onStart }) {
       <style>{CSS}</style>
       <div className="wrap" style={{ maxWidth: 460, paddingTop: 50 }}>
         <div className="sheet">
-          <div className="eyebrow" style={{ color: "var(--ink3)" }}>Transfer Desk</div>
+          <div className="eyebrow" style={{ color: "var(--ink3)" }}>Bonvia</div>
           <h2 style={{ marginTop: 6, fontSize: 21 }}>Who's at the desk?</h2>
           <p className="sub">
             {returning
@@ -1728,7 +1728,7 @@ export default function TransferDesk() {
       <div className="topbar">
         <div className="topbar-in">
           <div className="brand">
-            <b>Transfer Desk</b>
+            <b>Bonvia</b>
             <span className="eyebrow">HR → Logistics · airport runs</span>
           </div>
           {!isDriver && pending.length > 0 && (
