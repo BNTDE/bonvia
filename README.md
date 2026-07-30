@@ -48,6 +48,19 @@ needs no changes at all — it only ever talks to this interface.
 Note that a shared board would hold passenger names and phone numbers, so a
 hosted backend brings GDPR obligations that per-browser storage does not.
 
+## Removing the demo data (before real use)
+
+A dashed **DEMO** bar sits at the top of every tab with a "Fill with sample
+transfers" button. To remove it completely, delete:
+
+1. `src/demo-data.js`
+2. the `import { makeDemoTransfers, DEMO_CONF } from "./demo-data.js"` line in `src/transfer-desk.jsx`
+3. the `DemoBar` component block in `src/transfer-desk.jsx` (marked `DEMO BAR`)
+4. the `seedDemo` / `clearBoard` functions (marked `DEMO`)
+5. the `<DemoBar ... />` line inside `<div className="wrap">`
+
+Nothing else references any of it.
+
 ## Privacy
 
 - No credentials, API keys or tokens anywhere in this project.
